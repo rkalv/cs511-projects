@@ -34,53 +34,44 @@ class AgentFunction {
 	private boolean scream;
 	private Random rand;
 
-	public AgentFunction()
-	{
-		// for illustration purposes; you may delete all code
-		// inside this constructor when implementing your 
-		// own intelligent agent
-
-		// this integer array will store the agent actions
-		actionTable = new int[8];
-				  
-		actionTable[0] = Action.GO_FORWARD;
-		actionTable[1] = Action.GO_FORWARD;
-		actionTable[2] = Action.GO_FORWARD;
-		actionTable[3] = Action.GO_FORWARD;
-		actionTable[4] = Action.TURN_RIGHT;
-		actionTable[5] = Action.TURN_LEFT;
-		actionTable[6] = Action.GRAB;
-		actionTable[7] = Action.SHOOT;
-		
-		// new random number generator, for
-		// randomly picking actions to execute
+	public AgentFunction() {
+		// initialize random number generator
 		rand = new Random();
 	}
 
-	public int process(TransferPercept tp)
-	{
-		// To build your own intelligent agent, replace
-		// all code below this comment block. You have
-		// access to all percepts through the object
-		// 'tp' as illustrated here:
-		
+	public int process(TransferPercept tp) {
 		// read in the current percepts
 		bump = tp.getBump();
 		glitter = tp.getGlitter();
 		breeze = tp.getBreeze();
 		stench = tp.getStench();
 		scream = tp.getScream();
-		
-		if (bump == true || glitter == true || breeze == true || stench == true || scream == true) {
-			// do something...?
+
+		// Rule 1: Prioritize grabbing gold immediately
+		if (glitter) {
+			return Action.GRAB;
 		}
-		
-		// return action to be performed
-	    return actionTable[rand.nextInt(8)];	    
+
+		// Rule 2: Shoot Wumpus if stench is detected
+		if (stench && hasArrow) {
+			return Action.SHOOT;
+		}
+
+		// Rule 3: Avoid pits and infinite loop sequence by no op on breeze.
+		if (breeze) {
+			return Action.NO_OP;
+		}
+
+		//Rule 4: Avoid walls by turning left. Non-deterministic action added to avoid repreated sequence.
+		if (bump) {
+			return (Math.random() < 0.8 ? Action.TURN_LEFT : Action.GO_FORWARD);
+		}
+
+		//Default: move forward to explore
+		return Action.GO_FORWARD;
 	}
-	
+
 	// public method to return the agent's name
-	// do not remove this method
 	public String getAgentName() {
 		return agentName;
 	}
